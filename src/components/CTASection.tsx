@@ -49,7 +49,7 @@ const CTASection = () => {
                 </div>
                 <div>
                   <p className="text-background/70 text-sm">Email us</p>
-                  <p className="font-medium">hello@nexora.design</p>
+                  <p className="font-medium">hello@smartmeal.design</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">

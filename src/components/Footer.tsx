@@ -35,9 +35,9 @@ const Footer = () => {
           <div className="col-span-2 md:col-span-1">
             <a href="#" className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-heading font-bold text-lg">N</span>
+                <span className="text-primary-foreground font-heading font-bold text-lg">S</span>
               </div>
-              <span className="font-heading font-bold text-xl">Nexora</span>
+              <span className="font-heading font-bold text-xl">Smart Meal</span>
             </a>
             <p className="text-muted-foreground text-sm mb-6">
               Crafting intelligent, beautiful apps that users love.
@@ -111,7 +111,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
-            © 2024 Nexora. All rights reserved.
+            © 2024 Smart Meal. All rights reserved.
           </p>
           <p className="text-muted-foreground text-sm">
             Made with ❤️ in San Francisco

@@ -25,13 +25,13 @@ const AboutSection = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Content */}
           <div className="space-y-6">
-            <span className="text-primary font-semibold">About Nexora</span>
+            <span className="text-primary font-semibold">About Smart Meal</span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading">
               We design apps that{" "}
               <span className="gradient-text">solve real problems</span>
             </h2>
             <p className="text-lg text-muted-foreground">
-              Nexora is a boutique app design agency specializing in intelligent, 
+              Smart Meal is a boutique app design agency specializing in intelligent, 
               user-friendly mobile experiences. We combine stunning visual design 
               with powerful AI capabilities to create apps that genuinely improve 
               people's lives.
