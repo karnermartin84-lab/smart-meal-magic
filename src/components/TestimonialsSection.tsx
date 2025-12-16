@@ -11,7 +11,7 @@ const TestimonialsSection = () => {
       role: "CEO, FitLife",
       company: "FitLife App",
       image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
-      content: "Nexora transformed our fitness app vision into reality. The AI integration was seamless, and our user engagement increased by 340% after launch. Truly exceptional work.",
+      content: "Smart Meal transformed our fitness app vision into reality. The AI integration was seamless, and our user engagement increased by 340% after launch. Truly exceptional work.",
       rating: 5,
     },
     {
@@ -19,7 +19,7 @@ const TestimonialsSection = () => {
       role: "Founder",
       company: "GreenCart",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      content: "Working with Nexora felt like having an extension of our own team. They understood our eco-friendly mission and delivered an app that our customers absolutely love.",
+      content: "Working with Smart Meal felt like having an extension of our own team. They understood our eco-friendly mission and delivered an app that our customers absolutely love.",
       rating: 5,
     },
     {
@@ -27,7 +27,7 @@ const TestimonialsSection = () => {
       role: "Product Lead",
       company: "MindfulMe",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: "The attention to detail in both design and functionality was outstanding. Nexora delivered ahead of schedule and exceeded all our expectations. Highly recommend!",
+      content: "The attention to detail in both design and functionality was outstanding. Smart Meal delivered ahead of schedule and exceeded all our expectations. Highly recommend!",
       rating: 5,
     },
   ];
@@ -52,7 +52,7 @@ const TestimonialsSection = () => {
           </h2>
           <p className="text-lg text-muted-foreground">
             Don't just take our word for it. Here's what our clients say about 
-            working with Nexora.
+            working with Smart Meal.
           </p>
         </div>
 
