@@ -75,8 +75,8 @@ export function useMeals() {
 
   const createMeal = async (
     meal: Omit<Meal, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'meal_items'>,
-    items: Omit<MealItem, 'id' | 'meal_id' | 'created_at'>[]
-  ) => {
+    items: { fridge_item_id: string | null; name: string; quantity: number; unit: string; calories: number; protein: number; carbs: number; fat: number }[]
+  ): Promise<Meal | null> => {
     if (!user) return null;
 
     try {
