@@ -29,7 +29,7 @@ interface MealBuilderProps {
     total_fat: number;
     is_favorite: boolean;
   }, items: {
-    fridge_item_id: string;
+    fridge_item_id: string | null;
     name: string;
     quantity: number;
     unit: string;
@@ -37,7 +37,7 @@ interface MealBuilderProps {
     protein: number;
     carbs: number;
     fat: number;
-  }[]) => Promise<void>;
+  }[]) => Promise<unknown>;
 }
 
 export function MealBuilder({ open, onClose, fridgeItems, onCreateMeal }: MealBuilderProps) {
