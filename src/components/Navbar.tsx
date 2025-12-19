@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
@@ -29,12 +30,12 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-20">
-          <a href="#" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading font-bold text-lg">S</span>
+              <span className="text-primary-foreground font-heading font-bold text-lg">S</span>
             </div>
             <span className="font-heading font-bold text-xl">Smart Meal</span>
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
@@ -50,8 +51,12 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost">Log in</Button>
-            <Button variant="hero">Start Project</Button>
+            <Button variant="ghost" asChild>
+              <Link to="/auth">Log in</Link>
+            </Button>
+            <Button variant="hero" asChild>
+              <Link to="/auth">Try the App</Link>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -78,8 +83,12 @@ const Navbar = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-4">
-                <Button variant="ghost">Log in</Button>
-                <Button variant="hero">Start Project</Button>
+                <Button variant="ghost" asChild>
+                  <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
+                </Button>
+                <Button variant="hero" asChild>
+                  <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>Try the App</Link>
+                </Button>
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Scan, Sparkles } from "lucide-react";
 
@@ -44,12 +45,16 @@ const HeroSection = () => {
               className="flex flex-wrap gap-4 opacity-0 animate-fade-up"
               style={{ animationDelay: "0.4s" }}
             >
-              <Button variant="hero" size="lg">
-                Start Your Project
-                <ArrowRight size={18} />
+              <Button variant="hero" size="lg" asChild>
+                <Link to="/auth">
+                  Try SmartMeal App
+                  <ArrowRight size={18} />
+                </Link>
               </Button>
-              <Button variant="heroOutline" size="lg">
-                View Case Study
+              <Button variant="heroOutline" size="lg" asChild>
+                <Link to="/auth">
+                  Sign Up Free
+                </Link>
               </Button>
             </div>
 
