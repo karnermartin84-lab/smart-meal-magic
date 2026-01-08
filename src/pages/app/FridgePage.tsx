@@ -93,7 +93,7 @@ export default function FridgePage() {
           </div>
         )}
 
-        <BarcodeScanner open={scannerOpen} onClose={() => setScannerOpen(false)} onScan={handleBarcodeScan} />
+        <BarcodeScanner open={scannerOpen} onClose={() => setScannerOpen(false)} onDetected={handleBarcodeScan} />
         <FoodSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} onSelect={(item) => { setScannedItem(item); setAddDialogOpen(true); setSearchOpen(false); }} />
         <AddItemDialog open={addDialogOpen} onClose={() => { setAddDialogOpen(false); setScannedItem(null); }} onAdd={handleAddItem} initialData={scannedItem || undefined} loading={lookingUp} />
       </div>
