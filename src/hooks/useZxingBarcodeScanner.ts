@@ -117,7 +117,6 @@ export function useZxingBarcodeScanner(params: {
     const video = videoRef.current;
     if (video) {
       video.pause();
-      // @ts-expect-error - TS doesn't know about srcObject on HTMLMediaElement in some libs.
       video.srcObject = null;
     }
 
@@ -175,7 +174,6 @@ export function useZxingBarcodeScanner(params: {
       }
 
       streamRef.current = stream;
-      // @ts-expect-error - TS doesn't know about srcObject on HTMLMediaElement in some libs.
       video.srcObject = stream;
       video.playsInline = true;
       video.muted = true;
