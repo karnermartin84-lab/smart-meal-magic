@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Trash2, ChefHat, CalendarPlus, Loader2, User, ShoppingCart } from 'lucide-react';
+import { Send, Trash2, ChefHat, CalendarPlus, Loader2, User, ShoppingCart, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAIChefChat, ChatMessage, MealData } from '@/hooks/useAIChefChat';
+import { useAIChefChat, ChatMessage, MealData, VIBE_FILTERS, VibeFilter } from '@/hooks/useAIChefChat';
 import { FridgeItem } from '@/hooks/useFridgeItems';
 import { PantryItem } from '@/hooks/usePantryItems';
 import { cn } from '@/lib/utils';
@@ -154,7 +154,7 @@ function MessageBubble({
 }
 
 export function AIChefChat({ open, onClose, fridgeItems, pantryItems, onAddToMealPlan }: AIChefChatProps) {
-  const { messages, isLoading, sendMessage, clearMessages } = useAIChefChat();
+  const { messages, isLoading, sendMessage, clearMessages, activeVibe, setActiveVibe } = useAIChefChat();
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -183,12 +183,43 @@ export function AIChefChat({ open, onClose, fridgeItems, pantryItems, onAddToMea
     onAddToMealPlan(meal);
   };
 
-  const quickPrompts = [
-    "Make me a 1000 calorie lunch using chicken",
-    "What can I make for dinner tonight?",
-    "Give me a high-protein breakfast idea",
-    "I want something indulgent and hearty",
-  ];
+  const getVibePrompts = () => {
+    switch (activeVibe) {
+      case 'comfort':
+        return [
+          "Make me the ultimate mac and cheese",
+          "I need a warm, hearty pot pie",
+          "Give me your best comfort pasta",
+        ];
+      case 'brainpower':
+        return [
+          "Make a salmon bowl with brain-boosting foods",
+          "I need an omega-3 rich lunch",
+          "Give me a focus-enhancing breakfast",
+        ];
+      case 'vacation':
+        return [
+          "Make me a tropical poke bowl",
+          "I want Caribbean jerk chicken",
+          "Give me a refreshing coconut curry",
+        ];
+      case 'quick':
+        return [
+          "What's the fastest healthy dinner?",
+          "5-minute high protein meal",
+          "No-cook lunch that's actually good",
+        ];
+      default:
+        return [
+          "Make me a 1000 calorie lunch",
+          "What can I make for dinner?",
+          "High-protein breakfast idea",
+          "Something indulgent and hearty",
+        ];
+    }
+  };
+
+  const quickPrompts = getVibePrompts();
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
@@ -217,14 +248,41 @@ export function AIChefChat({ open, onClose, fridgeItems, pantryItems, onAddToMea
 
         <ScrollArea className="flex-1 px-6 py-4" ref={scrollAreaRef}>
           {messages.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-6">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center mx-auto mb-4">
                 <ChefHat className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Hi! I'm your Personal Chef AI</h3>
-              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                Tell me what you're craving, your calorie goals, or just ask for ideas. I can see your fridge ({fridgeItems.length} items) and pantry ({pantryItems.length} items)!
+              <p className="text-muted-foreground mb-4 max-w-sm mx-auto text-sm">
+                Select a vibe below, or just tell me what you're craving!
               </p>
+
+              {/* Vibe Filters */}
+              <div className="mb-6">
+                <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Choose your vibe</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {VIBE_FILTERS.map((vibe) => (
+                    <button
+                      key={vibe.id}
+                      onClick={() => setActiveVibe(activeVibe === vibe.id ? null : vibe.id)}
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all",
+                        activeVibe === vibe.id
+                          ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                          : "bg-muted hover:bg-muted/80 text-foreground"
+                      )}
+                    >
+                      <span className="text-lg">{vibe.emoji}</span>
+                      <span>{vibe.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {activeVibe && (
+                  <p className="text-xs text-primary mt-2">
+                    {VIBE_FILTERS.find(v => v.id === activeVibe)?.description}
+                  </p>
+                )}
+              </div>
 
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Try asking:</p>
@@ -247,13 +305,30 @@ export function AIChefChat({ open, onClose, fridgeItems, pantryItems, onAddToMea
               </div>
             </div>
           ) : (
-            messages.map((msg) => (
-              <MessageBubble
-                key={msg.id}
-                message={msg}
-                onAddToPlan={handleAddToPlan}
-              />
-            ))
+            <>
+              {/* Active vibe indicator when chatting */}
+              {activeVibe && (
+                <div className="flex items-center justify-center gap-2 mb-4 p-2 rounded-lg bg-primary/10 border border-primary/20">
+                  <span className="text-lg">{VIBE_FILTERS.find(v => v.id === activeVibe)?.emoji}</span>
+                  <span className="text-sm font-medium text-primary">
+                    {VIBE_FILTERS.find(v => v.id === activeVibe)?.label} Mode
+                  </span>
+                  <button
+                    onClick={() => setActiveVibe(null)}
+                    className="ml-2 p-1 rounded-full hover:bg-primary/20 transition-colors"
+                  >
+                    <X className="w-3 h-3 text-primary" />
+                  </button>
+                </div>
+              )}
+              {messages.map((msg) => (
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  onAddToPlan={handleAddToPlan}
+                />
+              ))}
+            </>
           )}
 
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
