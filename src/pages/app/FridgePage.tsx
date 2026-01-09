@@ -1,14 +1,23 @@
 import { useState } from 'react';
-import { Plus, ScanLine, Search, Loader2 } from 'lucide-react';
+import { Plus, ScanLine, Search, Loader2, Camera } from 'lucide-react';
 import { AppLayout } from '@/components/app/AppLayout';
 import { Button } from '@/components/ui/button';
 import { FridgeItemCard } from '@/components/app/FridgeItemCard';
 import { BarcodeScanner } from '@/components/app/BarcodeScanner';
 import { FoodSearchDialog } from '@/components/app/FoodSearchDialog';
 import { AddItemDialog } from '@/components/app/AddItemDialog';
+import { FridgePhotoScanner } from '@/components/app/FridgePhotoScanner';
+import { FridgeSuggestionsDialog } from '@/components/app/FridgeSuggestionsDialog';
 import { useFridgeItems } from '@/hooks/useFridgeItems';
 import { lookupBarcode, convertToFridgeItem } from '@/lib/openFoodFacts';
 import { useToast } from '@/hooks/use-toast';
+
+interface FoodSuggestion {
+  name: string;
+  confidence: number;
+  quantity: number;
+  unit: string;
+}
 
 export default function FridgePage() {
   const { items, loading, addItem, updateItem, deleteItem } = useFridgeItems();
@@ -16,6 +25,10 @@ export default function FridgePage() {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [photoScannerOpen, setPhotoScannerOpen] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [photoSuggestions, setPhotoSuggestions] = useState<FoodSuggestion[]>([]);
+  const [photoNotes, setPhotoNotes] = useState<string | null>(null);
   const [scannedItem, setScannedItem] = useState<ReturnType<typeof convertToFridgeItem> | null>(null);
   const [lookingUp, setLookingUp] = useState(false);
 
@@ -43,6 +56,30 @@ export default function FridgePage() {
     setScannedItem(null);
   };
 
+  const handlePhotoSuggestions = (suggestions: FoodSuggestion[], notes: string | null) => {
+    setPhotoSuggestions(suggestions);
+    setPhotoNotes(notes);
+    setSuggestionsOpen(true);
+  };
+
+  const handleConfirmSuggestions = async (fridgeItems: any[]) => {
+    let addedCount = 0;
+    for (const item of fridgeItems) {
+      const result = await addItem(item);
+      if (result) addedCount++;
+    }
+    setSuggestionsOpen(false);
+    setPhotoSuggestions([]);
+    setPhotoNotes(null);
+    
+    if (addedCount > 0) {
+      toast({
+        title: `Added ${addedCount} item${addedCount !== 1 ? 's' : ''}`,
+        description: 'Items have been added to your fridge'
+      });
+    }
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -55,9 +92,13 @@ export default function FridgePage() {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Button onClick={() => setScannerOpen(true)} className="flex-1">
+          <Button onClick={() => setPhotoScannerOpen(true)} className="flex-1">
+            <Camera className="w-4 h-4 mr-2" />
+            Photo Scan
+          </Button>
+          <Button variant="outline" onClick={() => setScannerOpen(true)} className="flex-1">
             <ScanLine className="w-4 h-4 mr-2" />
-            Scan Barcode
+            Barcode
           </Button>
           <Button variant="outline" onClick={() => setSearchOpen(true)}>
             <Search className="w-4 h-4" />
@@ -96,6 +137,18 @@ export default function FridgePage() {
         <BarcodeScanner open={scannerOpen} onClose={() => setScannerOpen(false)} onDetected={handleBarcodeScan} />
         <FoodSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} onSelect={(item) => { setScannedItem(item); setAddDialogOpen(true); setSearchOpen(false); }} />
         <AddItemDialog open={addDialogOpen} onClose={() => { setAddDialogOpen(false); setScannedItem(null); }} onAdd={handleAddItem} initialData={scannedItem || undefined} loading={lookingUp} />
+        <FridgePhotoScanner 
+          open={photoScannerOpen} 
+          onClose={() => setPhotoScannerOpen(false)} 
+          onSuggestionsReceived={handlePhotoSuggestions} 
+        />
+        <FridgeSuggestionsDialog
+          open={suggestionsOpen}
+          onClose={() => { setSuggestionsOpen(false); setPhotoSuggestions([]); setPhotoNotes(null); }}
+          suggestions={photoSuggestions}
+          notes={photoNotes}
+          onConfirm={handleConfirmSuggestions}
+        />
       </div>
     </AppLayout>
   );
