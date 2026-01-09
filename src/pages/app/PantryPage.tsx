@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { Plus, Loader2, Search } from 'lucide-react';
+import { Plus, Loader2, Search, Receipt } from 'lucide-react';
 import { AppLayout } from '@/components/app/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PantryItemCard } from '@/components/app/PantryItemCard';
 import { AddPantryItemDialog } from '@/components/app/AddPantryItemDialog';
+import { ReceiptScanner } from '@/components/app/ReceiptScanner';
 import { usePantryItems, PANTRY_CATEGORIES } from '@/hooks/usePantryItems';
+import { useFridgeItems } from '@/hooks/useFridgeItems';
 
 export default function PantryPage() {
   const { items, loading, addItem, updateItem, deleteItem } = usePantryItems();
+  const { addItem: addFridgeItem } = useFridgeItems();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [receiptScannerOpen, setReceiptScannerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredItems = items.filter(item =>
@@ -26,6 +30,36 @@ export default function PantryPage() {
     return acc;
   }, [] as { category: typeof PANTRY_CATEGORIES[0]; items: typeof items }[]);
 
+  const handleAddToFridge = async (receiptItems: Array<{ name: string; quantity: number; unit: string }>) => {
+    for (const item of receiptItems) {
+      await addFridgeItem({
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        barcode: null,
+        brand: null,
+        calories_per_serving: 0,
+        protein_per_serving: 0,
+        carbs_per_serving: 0,
+        fat_per_serving: 0,
+        serving_size: '100g',
+        image_url: null,
+        expires_at: null,
+      });
+    }
+  };
+
+  const handleAddToPantry = async (receiptItems: Array<{ name: string; quantity: number; unit: string; category: string }>) => {
+    for (const item of receiptItems) {
+      await addItem({
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+      });
+    }
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -34,10 +68,16 @@ export default function PantryPage() {
             <h1 className="text-2xl font-display font-bold text-foreground">My Pantry</h1>
             <p className="text-muted-foreground">{items.length} staples</p>
           </div>
-          <Button onClick={() => setAddDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Item
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setReceiptScannerOpen(true)}>
+              <Receipt className="w-4 h-4 mr-2" />
+              Scan Receipt
+            </Button>
+            <Button onClick={() => setAddDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add
+            </Button>
+          </div>
         </div>
 
         {/* Search */}
@@ -63,10 +103,16 @@ export default function PantryPage() {
             <p className="text-muted-foreground mb-4">
               Add long-term staples like flour, sugar, spices, and oils
             </p>
-            <Button onClick={() => setAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add your first item
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button variant="outline" onClick={() => setReceiptScannerOpen(true)}>
+                <Receipt className="w-4 h-4 mr-2" />
+                Scan Receipt
+              </Button>
+              <Button onClick={() => setAddDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add manually
+              </Button>
+            </div>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="text-center py-12">
@@ -98,6 +144,12 @@ export default function PantryPage() {
           open={addDialogOpen}
           onClose={() => setAddDialogOpen(false)}
           onAdd={addItem}
+        />
+        <ReceiptScanner
+          open={receiptScannerOpen}
+          onClose={() => setReceiptScannerOpen(false)}
+          onAddToFridge={handleAddToFridge}
+          onAddToPantry={handleAddToPantry}
         />
       </div>
     </AppLayout>
