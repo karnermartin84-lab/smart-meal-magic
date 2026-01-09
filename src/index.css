@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 145 30% 97%;
     --foreground: 160 10% 10%;
 
     --card: 0 0% 100%;
@@ -24,32 +24,43 @@
     --muted: 160 20% 96%;
     --muted-foreground: 160 10% 45%;
 
-    --accent: 16 90% 60%;
+    --accent: 24 95% 53%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 160 20% 90%;
+    --border: 160 20% 88%;
     --input: 160 20% 90%;
     --ring: 160 84% 39%;
 
-    --radius: 1rem;
+    --radius: 1.5rem;
 
-    /* Custom tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(160 84% 39% / 0.1) 0%, hsl(16 90% 60% / 0.1) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(160 84% 39%) 0%, hsl(160 70% 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(16 90% 60%) 0%, hsl(30 90% 55%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 100% / 0.7) 100%);
+    /* Glassmorphism tokens */
+    --glass-bg: 0 0% 100% / 0.65;
+    --glass-border: 0 0% 100% / 0.4;
+    --glass-blur: 20px;
     
-    --shadow-soft: 0 4px 20px -4px hsl(160 84% 39% / 0.15);
-    --shadow-card: 0 8px 30px -8px hsl(160 10% 10% / 0.1);
-    --shadow-elevated: 0 20px 50px -15px hsl(160 10% 10% / 0.15);
-    --shadow-glow: 0 0 40px hsl(160 84% 39% / 0.3);
+    /* Gradient backgrounds */
+    --gradient-mesh: 
+      radial-gradient(at 20% 30%, hsl(160 70% 60% / 0.4) 0%, transparent 50%),
+      radial-gradient(at 80% 20%, hsl(24 95% 60% / 0.3) 0%, transparent 50%),
+      radial-gradient(at 40% 80%, hsl(160 50% 45% / 0.3) 0%, transparent 50%),
+      radial-gradient(at 90% 70%, hsl(30 90% 55% / 0.25) 0%, transparent 50%);
+    --gradient-hero: linear-gradient(135deg, hsl(160 84% 39% / 0.15) 0%, hsl(24 95% 53% / 0.15) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(160 84% 39%) 0%, hsl(160 70% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(24 95% 53%) 0%, hsl(30 90% 55%) 100%);
+    
+    /* Enhanced shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(160 84% 39% / 0.12);
+    --shadow-card: 0 8px 32px -8px hsl(160 10% 10% / 0.08);
+    --shadow-elevated: 0 24px 48px -12px hsl(160 10% 10% / 0.12);
+    --shadow-glow: 0 0 60px hsl(160 84% 39% / 0.25);
+    --shadow-glass: 0 8px 32px 0 hsl(160 10% 10% / 0.06);
   }
 
   .dark {
-    --background: 160 20% 6%;
+    --background: 160 25% 5%;
     --foreground: 0 0% 98%;
 
     --card: 160 20% 8%;
@@ -58,7 +69,7 @@
     --popover: 160 20% 8%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 160 84% 45%;
+    --primary: 160 84% 50%;
     --primary-foreground: 160 20% 6%;
 
     --secondary: 160 20% 12%;
@@ -67,15 +78,25 @@
     --muted: 160 20% 15%;
     --muted-foreground: 160 10% 60%;
 
-    --accent: 16 90% 60%;
+    --accent: 24 95% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 160 20% 15%;
+    --border: 160 20% 18%;
     --input: 160 20% 15%;
-    --ring: 160 84% 45%;
+    --ring: 160 84% 50%;
+    
+    /* Dark mode glassmorphism */
+    --glass-bg: 160 20% 10% / 0.7;
+    --glass-border: 0 0% 100% / 0.08;
+    --gradient-mesh: 
+      radial-gradient(at 20% 30%, hsl(160 70% 35% / 0.4) 0%, transparent 50%),
+      radial-gradient(at 80% 20%, hsl(24 95% 45% / 0.3) 0%, transparent 50%),
+      radial-gradient(at 40% 80%, hsl(160 50% 30% / 0.3) 0%, transparent 50%),
+      radial-gradient(at 90% 70%, hsl(30 80% 40% / 0.2) 0%, transparent 50%);
+    --shadow-glass: 0 8px 32px 0 hsl(0 0% 0% / 0.3);
   }
 }
 
@@ -94,9 +115,34 @@
 }
 
 @layer components {
+  /* Glassmorphism card */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl;
-    box-shadow: var(--shadow-card);
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid hsl(var(--glass-border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-glass);
+  }
+  
+  /* Widget card with enhanced glass effect */
+  .widget-card {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--glass-border));
+    border-radius: 1.25rem;
+    box-shadow: 
+      var(--shadow-glass),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .widget-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      var(--shadow-elevated),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.15);
   }
 
   .gradient-text {
@@ -123,6 +169,12 @@
 
   .section-padding {
     @apply py-20 md:py-32 px-4 md:px-8;
+  }
+  
+  /* Mesh gradient background */
+  .mesh-gradient {
+    background-image: var(--gradient-mesh);
+    background-color: hsl(var(--background));
   }
 }
 
