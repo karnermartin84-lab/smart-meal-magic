@@ -19,6 +19,7 @@ const SLOTS: { key: MealSlot; label: string; icon: string }[] = [
   { key: 'breakfast', label: 'Breakfast', icon: '🌅' },
   { key: 'lunch', label: 'Lunch', icon: '☀️' },
   { key: 'dinner', label: 'Dinner', icon: '🌙' },
+  { key: 'snack', label: 'Snacks', icon: '🍿' },
 ];
 
 export function MealPlanCalendar({ meals, onDragStart, draggedMeal }: MealPlanCalendarProps) {

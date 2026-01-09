@@ -1,19 +1,24 @@
 import { useState } from 'react';
-import { CalendarDays, Sparkles, Plus } from 'lucide-react';
+import { CalendarDays, Sparkles, Plus, ShoppingCart } from 'lucide-react';
 import { AppLayout } from '@/components/app/AppLayout';
 import { Button } from '@/components/ui/button';
 import { MealPlanCalendar } from '@/components/app/MealPlanCalendar';
 import { MealBuilder } from '@/components/app/MealBuilder';
 import { AIMealSuggestions } from '@/components/app/AIMealSuggestions';
+import { ShoppingListDialog } from '@/components/app/ShoppingListDialog';
 import { useMeals, Meal } from '@/hooks/useMeals';
 import { useFridgeItems } from '@/hooks/useFridgeItems';
+import { useMealPlan } from '@/hooks/useMealPlan';
 import { Loader2 } from 'lucide-react';
 
 export default function MealPlanPage() {
   const { meals, loading, createMeal } = useMeals();
   const { items: fridgeItems } = useFridgeItems();
+  const [currentWeek] = useState(new Date());
+  const { weekPlan } = useMealPlan(currentWeek);
   const [builderOpen, setBuilderOpen] = useState(false);
   const [aiSuggestionsOpen, setAiSuggestionsOpen] = useState(false);
+  const [shoppingListOpen, setShoppingListOpen] = useState(false);
   const [draggedMeal, setDraggedMeal] = useState<Meal | null>(null);
 
   const handleDragStart = (meal: Meal) => {
@@ -37,13 +42,17 @@ export default function MealPlanPage() {
             <p className="text-muted-foreground">Plan your meals for the week</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShoppingListOpen(true)}>
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Shopping List</span>
+            </Button>
             <Button variant="outline" onClick={() => setAiSuggestionsOpen(true)} className="hidden md:flex">
               <Sparkles className="w-4 h-4 mr-2" />
               AI Ideas
             </Button>
             <Button onClick={() => setBuilderOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              New Meal
+              <span className="hidden sm:inline">New Meal</span>
             </Button>
           </div>
         </div>
@@ -85,6 +94,13 @@ export default function MealPlanPage() {
           onClose={() => setAiSuggestionsOpen(false)} 
           fridgeItems={fridgeItems} 
           onSaveMeal={createMeal}
+        />
+
+        <ShoppingListDialog
+          open={shoppingListOpen}
+          onClose={() => setShoppingListOpen(false)}
+          weekPlan={weekPlan}
+          fridgeItems={fridgeItems}
         />
       </div>
     </AppLayout>
