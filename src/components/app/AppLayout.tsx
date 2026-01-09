@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, UtensilsCrossed, ShoppingBasket, CalendarDays, User, LogOut } from 'lucide-react';
+import { Home, UtensilsCrossed, ShoppingBasket, CalendarDays, User, LogOut, ChefHat, Package } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -12,9 +12,9 @@ interface AppLayoutProps {
 const navItems = [
   { path: '/app', icon: Home, label: 'Home' },
   { path: '/app/fridge', icon: ShoppingBasket, label: 'Fridge' },
-  { path: '/app/meals', icon: UtensilsCrossed, label: 'Meals' },
+  { path: '/app/pantry', icon: Package, label: 'Pantry' },
+  { path: '/app/chef', icon: ChefHat, label: 'Chef' },
   { path: '/app/plan', icon: CalendarDays, label: 'Plan' },
-  { path: '/app/profile', icon: User, label: 'Profile' },
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {

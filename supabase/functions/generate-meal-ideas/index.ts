@@ -42,10 +42,10 @@ serve(async (req) => {
     ).join('\n');
 
     const mealTypePrompt = preferences.mealType === 'healthy' 
-      ? 'Focus on healthy, nutritious meals with high protein, balanced macros, or lower calories.'
+      ? 'Focus on healthy, nutritious meals with high protein, balanced macros, or lower calories (400-600 kcal).'
       : preferences.mealType === 'comfort'
-      ? 'Focus on comfort food, indulgent meals, and satisfying dishes that may be higher in calories.'
-      : 'Include a mix of healthy and comfort food options.';
+      ? 'Focus on comfort food, indulgent meals, and satisfying high-calorie dishes (800-1200+ kcal). Include hearty pastas, burgers, steaks, rich sauces, and filling meals for muscle gain or high-energy lifestyles.'
+      : 'Include a diverse mix: some lighter healthy options (400-600 kcal) AND some hearty high-calorie meals (800-1200+ kcal) like pastas, burgers, rice bowls, and comfort food. Cater to all body goals including muscle gain.';
 
     const ingredientPrompt = preferences.onlyUseAvailable
       ? 'ONLY use the ingredients from the fridge list. Do not suggest any additional ingredients.'
