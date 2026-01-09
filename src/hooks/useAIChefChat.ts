@@ -10,21 +10,24 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+export interface MealIngredient {
+  name: string;
+  quantity: number;
+  unit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
 export interface MealData {
   name: string;
   description: string;
   cookingStyle: string;
   mealType: string;
   servings: number;
-  ingredients: Array<{
-    name: string;
-    quantity: number;
-    unit: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  }>;
+  ingredientsHave: MealIngredient[];
+  ingredientsMissing: MealIngredient[];
   instructions: string[];
   totalMacros: {
     calories: number;
@@ -45,8 +48,13 @@ export function useAIChefChat() {
       const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[1]);
-        if (parsed.name && parsed.ingredients && parsed.instructions) {
-          return parsed as MealData;
+        if (parsed.name && parsed.instructions) {
+          // Handle both old format (ingredients) and new format (ingredientsHave/ingredientsMissing)
+          return {
+            ...parsed,
+            ingredientsHave: parsed.ingredientsHave || parsed.ingredients || [],
+            ingredientsMissing: parsed.ingredientsMissing || [],
+          } as MealData;
         }
       }
     } catch {

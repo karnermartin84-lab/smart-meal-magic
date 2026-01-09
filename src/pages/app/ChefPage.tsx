@@ -7,6 +7,7 @@ import { AIChefChat } from '@/components/app/AIChefChat';
 import { useFridgeItems } from '@/hooks/useFridgeItems';
 import { usePantryItems } from '@/hooks/usePantryItems';
 import { useMeals } from '@/hooks/useMeals';
+import { useShoppingList } from '@/hooks/useShoppingList';
 import { MealData } from '@/hooks/useAIChefChat';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,10 +16,14 @@ export default function ChefPage() {
   const { items: fridgeItems } = useFridgeItems();
   const { items: pantryItems } = usePantryItems();
   const { createMeal } = useMeals();
+  const { addItems: addToShoppingList } = useShoppingList();
   const { toast } = useToast();
 
   const handleAddToMealPlan = async (meal: MealData) => {
     try {
+      // Combine all ingredients for the meal
+      const allIngredients = [...meal.ingredientsHave, ...meal.ingredientsMissing];
+      
       await createMeal(
         {
           name: meal.name,
@@ -31,7 +36,7 @@ export default function ChefPage() {
           total_fat: meal.totalMacros.fat,
           is_favorite: false,
         },
-        meal.ingredients.map(ing => ({
+        allIngredients.map(ing => ({
           fridge_item_id: null,
           name: ing.name,
           quantity: ing.quantity,
@@ -43,10 +48,27 @@ export default function ChefPage() {
         }))
       );
 
-      toast({
-        title: 'Meal saved!',
-        description: `${meal.name} has been added to your meals. You can now add it to your calendar.`,
-      });
+      // Add missing ingredients to shopping list
+      if (meal.ingredientsMissing.length > 0) {
+        addToShoppingList(
+          meal.ingredientsMissing.map(ing => ({
+            name: ing.name,
+            quantity: ing.quantity,
+            unit: ing.unit,
+            source: `AI Chef - ${meal.name}`,
+          }))
+        );
+
+        toast({
+          title: 'Meal saved!',
+          description: `${meal.name} added to meals. ${meal.ingredientsMissing.length} missing ingredient(s) added to shopping list.`,
+        });
+      } else {
+        toast({
+          title: 'Meal saved!',
+          description: `${meal.name} has been added to your meals. You have all the ingredients!`,
+        });
+      }
     } catch (error) {
       toast({
         title: 'Error',
@@ -111,11 +133,11 @@ export default function ChefPage() {
           <CardContent className="p-6">
             <h3 className="font-semibold mb-2">What can the Chef AI do?</h3>
             <ul className="text-sm text-muted-foreground space-y-2">
-              <li>✅ Create custom recipes based on your available ingredients</li>
+              <li>✅ Create custom recipes - even with missing ingredients</li>
               <li>✅ Target specific calorie goals (800-1200+ kcal for hearty meals)</li>
-              <li>✅ Suggest diverse meals: pastas, burgers, steaks, comfort food</li>
+              <li>✅ Clearly list "Missing Ingredients" you need to buy</li>
+              <li>✅ Auto-add missing ingredients to shopping list when saving</li>
               <li>✅ Answer cooking questions and provide tips</li>
-              <li>✅ Save recipes directly to your meal plan</li>
             </ul>
           </CardContent>
         </Card>
