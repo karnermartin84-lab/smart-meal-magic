@@ -1,1 +1,10 @@
 project_id = "ebemdtwpdnwmalqdadrd"
+
+[functions.analyze-fridge-photo]
+verify_jwt = false
+
+[functions.generate-meal-ideas]
+verify_jwt = false
+
+[functions.ai-chef-chat]
+verify_jwt = false

@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          meal_data: Json | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          meal_data?: Json | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          meal_data?: Json | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fridge_items: {
         Row: {
           barcode: string | null
@@ -209,6 +236,66 @@ export type Database = {
           total_carbs?: number | null
           total_fat?: number | null
           total_protein?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pantry_items: {
+        Row: {
+          barcode: string | null
+          brand: string | null
+          calories_per_serving: number | null
+          carbs_per_serving: number | null
+          category: string | null
+          created_at: string
+          fat_per_serving: number | null
+          id: string
+          image_url: string | null
+          name: string
+          notes: string | null
+          protein_per_serving: number | null
+          quantity: number
+          serving_size: string | null
+          unit: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          barcode?: string | null
+          brand?: string | null
+          calories_per_serving?: number | null
+          carbs_per_serving?: number | null
+          category?: string | null
+          created_at?: string
+          fat_per_serving?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          notes?: string | null
+          protein_per_serving?: number | null
+          quantity?: number
+          serving_size?: string | null
+          unit?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          barcode?: string | null
+          brand?: string | null
+          calories_per_serving?: number | null
+          carbs_per_serving?: number | null
+          category?: string | null
+          created_at?: string
+          fat_per_serving?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          notes?: string | null
+          protein_per_serving?: number | null
+          quantity?: number
+          serving_size?: string | null
+          unit?: string
           updated_at?: string
           user_id?: string
         }
