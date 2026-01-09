@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import {
-  BarcodeFormat,
-  DecodeHintType,
-  NotFoundException,
-} from "@zxing/library";
+import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 
 export type ZxingScannerStatus = "idle" | "starting" | "scanning" | "error";
 
@@ -351,6 +347,11 @@ export function useZxingBarcodeScanner(params: {
       setError(message);
     }
   }, [onDetected, regionRef, stop, videoRef]);
+
+  // Keep activeRef in sync so the scanning loop can check it.
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
 
   useEffect(() => {
     if (!active) {
