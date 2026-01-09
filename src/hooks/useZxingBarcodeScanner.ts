@@ -102,6 +102,8 @@ export function useZxingBarcodeScanner(params: {
   const rafRef = useRef<number | null>(null);
   const lastScanAtRef = useRef(0);
   const lockRef = useRef(false);
+  const activeRef = useRef(active);
+  const startSeqRef = useRef(0);
 
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -131,6 +133,13 @@ export function useZxingBarcodeScanner(params: {
     const video = videoRef.current;
     if (!video) return;
 
+    // New "session" for this start attempt (prevents races if user taps Try Again quickly)
+    startSeqRef.current += 1;
+    const seq = startSeqRef.current;
+
+    lockRef.current = false;
+    lastScanAtRef.current = 0;
+
     stop();
 
     setStatus("starting");
@@ -141,6 +150,67 @@ export function useZxingBarcodeScanner(params: {
       setError("Camera API not available in this browser.");
       return;
     }
+
+    const waitForVideoReady = (timeoutMs: number) =>
+      new Promise<void>((resolve, reject) => {
+        if (video.readyState >= 2 && video.videoWidth && video.videoHeight) {
+          resolve();
+          return;
+        }
+
+        const done = () => {
+          cleanup();
+          resolve();
+        };
+
+        const cleanup = () => {
+          video.removeEventListener("loadedmetadata", done);
+          video.removeEventListener("loadeddata", done);
+          window.clearTimeout(timer);
+        };
+
+        const timer = window.setTimeout(() => {
+          cleanup();
+          reject(new Error("Camera did not start. Tap Try Again."));
+        }, timeoutMs);
+
+        video.addEventListener("loadedmetadata", done);
+        video.addEventListener("loadeddata", done);
+      });
+
+    const tryPlay = async () => {
+      // iOS Safari can be picky; do a couple attempts without hanging.
+      for (let i = 0; i < 2; i += 1) {
+        try {
+          await video.play();
+          return true;
+        } catch {
+          await new Promise((r) => setTimeout(r, 200));
+        }
+      }
+      return false;
+    };
+
+    const getStreamWithFallback = async () => {
+      // IMPORTANT: iOS Safari is sensitive to constraints.
+      // - No facingMode: { exact: "environment" }
+      // - Avoid forcing resolutions/frame rates
+      const candidates: MediaStreamConstraints[] = [
+        { audio: false, video: { facingMode: { ideal: "environment" } } },
+        { audio: false, video: { facingMode: { ideal: "user" } } },
+        { audio: false, video: true },
+      ];
+
+      let lastErr: unknown = null;
+      for (const c of candidates) {
+        try {
+          return await navigator.mediaDevices.getUserMedia(c);
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      throw lastErr ?? new Error("Failed to access camera.");
+    };
 
     try {
       // Hints to focus on UPC/EAN for reliability.
@@ -155,50 +225,44 @@ export function useZxingBarcodeScanner(params: {
         readerRef.current = new BrowserMultiFormatReader(hints);
       }
 
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-        });
-      } catch (err: any) {
-        // Desktop webcams / some browsers can choke on facingMode.
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: true,
-        });
+      const stream = await getStreamWithFallback();
+      if (seq !== startSeqRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
       }
 
       streamRef.current = stream;
-      video.srcObject = stream;
+
+      // Ensure iOS-friendly attributes are set before play
       video.playsInline = true;
+      video.setAttribute("playsinline", "true");
       video.muted = true;
+      video.autoplay = true;
+      video.srcObject = stream;
 
-      const played = await video.play().then(
-        () => true,
-        () => false,
-      );
+      await waitForVideoReady(1500);
 
+      const played = await tryPlay();
       if (!played) {
         throw new Error("Could not start camera preview. Tap Try Again.");
       }
 
+      if (seq !== startSeqRef.current) return;
+
       setStatus("scanning");
 
-      const tick = () => {
-        if (!active) return;
+      const tick = (ts: number) => {
+        if (!activeRef.current) {
+          stop();
+          return;
+        }
         if (lockRef.current) return;
 
-        const now = performance.now();
-        if (now - lastScanAtRef.current < 140) {
+        if (ts - lastScanAtRef.current < 140) {
           rafRef.current = requestAnimationFrame(tick);
           return;
         }
-        lastScanAtRef.current = now;
+        lastScanAtRef.current = ts;
 
         const regionEl = regionRef.current;
         const reader = readerRef.current;
@@ -216,8 +280,12 @@ export function useZxingBarcodeScanner(params: {
 
         const canvas =
           canvasRef.current ?? (canvasRef.current = document.createElement("canvas"));
-        canvas.width = crop.sw;
-        canvas.height = crop.sh;
+
+        // Downscale the crop for speed while keeping enough detail for UPC/EAN.
+        const maxW = 800;
+        const scale = Math.min(1, maxW / crop.sw);
+        canvas.width = Math.max(40, Math.floor(crop.sw * scale));
+        canvas.height = Math.max(40, Math.floor(crop.sh * scale));
 
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
         if (!ctx) {
@@ -241,7 +309,6 @@ export function useZxingBarcodeScanner(params: {
           const result = reader.decodeFromCanvas(canvas);
           const raw = normalizeBarcode(result.getText());
 
-          // Only accept UPC/EAN here (per requirements).
           if (!isUpcEan(raw)) {
             rafRef.current = requestAnimationFrame(tick);
             return;
@@ -252,10 +319,11 @@ export function useZxingBarcodeScanner(params: {
           onDetected(raw);
           return;
         } catch (e: any) {
-          if (e instanceof NotFoundException) {
-            // nothing found in this frame
+          const name = e?.name || e?.constructor?.name;
+          // NotFoundException is expected for most frames; keep the loop running.
+          if (name !== "NotFoundException") {
+            // Ignore other per-frame errors to avoid breaking scanning.
           }
-          // Ignore other per-frame errors to keep scanning robust.
         }
 
         rafRef.current = requestAnimationFrame(tick);
@@ -282,7 +350,7 @@ export function useZxingBarcodeScanner(params: {
       setStatus("error");
       setError(message);
     }
-  }, [active, onDetected, regionRef, stop, videoRef]);
+  }, [onDetected, regionRef, stop, videoRef]);
 
   useEffect(() => {
     if (!active) {
