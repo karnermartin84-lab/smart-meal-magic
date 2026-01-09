@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { FridgeItem } from './useFridgeItems';
 import { PantryItem } from './usePantryItems';
 
@@ -36,8 +37,6 @@ export interface MealData {
     fat: number;
   };
 }
-
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chef-chat`;
 
 export function useAIChefChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -81,11 +80,20 @@ export function useAIChefChat() {
     let assistantContent = '';
 
     try {
-      const response = await fetch(CHAT_URL, {
+      // Build the Supabase URL for streaming (functions.invoke doesn't support streaming)
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase configuration missing');
+      }
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/ai-chef-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey,
         },
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
@@ -112,8 +120,14 @@ export function useAIChefChat() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get response');
+        let errorMessage = 'Failed to get response';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = `Server error: ${response.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
       if (!response.body) throw new Error('No response body');
@@ -211,12 +225,18 @@ export function useAIChefChat() {
 
     } catch (error) {
       console.error('Chat error:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : error instanceof TypeError && error.message === 'Load failed'
+          ? 'Network connection failed. Please check your internet connection and try again.'
+          : 'Unknown error';
+      
       setMessages(prev => [
         ...prev,
         {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+          content: `Sorry, I encountered an error: ${errorMessage}. Please try again.`,
           timestamp: new Date(),
         },
       ]);
