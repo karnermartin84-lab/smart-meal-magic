@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/app/AppLayout';
 import { Button } from '@/components/ui/button';
 import { MealCard } from '@/components/app/MealCard';
 import { MealBuilder } from '@/components/app/MealBuilder';
+import { AIMealSuggestions } from '@/components/app/AIMealSuggestions';
 import { useMeals } from '@/hooks/useMeals';
 import { useFridgeItems } from '@/hooks/useFridgeItems';
 
@@ -11,6 +12,7 @@ export default function MealsPage() {
   const { meals, loading, createMeal, toggleFavorite, deleteMeal } = useMeals();
   const { items: fridgeItems } = useFridgeItems();
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [aiSuggestionsOpen, setAiSuggestionsOpen] = useState(false);
 
   return (
     <AppLayout>
@@ -20,10 +22,16 @@ export default function MealsPage() {
             <h1 className="text-2xl font-display font-bold text-foreground">My Meals</h1>
             <p className="text-muted-foreground">{meals.length} saved meals</p>
           </div>
-          <Button onClick={() => setBuilderOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Meal
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setAiSuggestionsOpen(true)}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              AI Ideas
+            </Button>
+            <Button onClick={() => setBuilderOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Meal
+            </Button>
+          </div>
         </div>
 
         {loading ? (
@@ -47,6 +55,13 @@ export default function MealsPage() {
         )}
 
         <MealBuilder open={builderOpen} onClose={() => setBuilderOpen(false)} fridgeItems={fridgeItems} onCreateMeal={createMeal} />
+        
+        <AIMealSuggestions 
+          open={aiSuggestionsOpen} 
+          onClose={() => setAiSuggestionsOpen(false)} 
+          fridgeItems={fridgeItems} 
+          onSaveMeal={createMeal}
+        />
       </div>
     </AppLayout>
   );
