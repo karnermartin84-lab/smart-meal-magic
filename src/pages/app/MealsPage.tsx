@@ -23,7 +23,7 @@ export default function MealsPage() {
             <p className="text-muted-foreground">{meals.length} saved meals</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setAiSuggestionsOpen(true)}>
+            <Button variant="outline" onClick={() => setAiSuggestionsOpen(true)} className="hidden md:flex">
               <Sparkles className="w-4 h-4 mr-2" />
               AI Ideas
             </Button>
@@ -47,12 +47,23 @@ export default function MealsPage() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20 md:pb-0">
             {meals.map((meal) => (
               <MealCard key={meal.id} meal={meal} onToggleFavorite={toggleFavorite} onDelete={deleteMeal} />
             ))}
           </div>
         )}
+
+        {/* Fixed AI Ideas button on mobile */}
+        <div className="fixed bottom-6 right-6 md:hidden z-50">
+          <Button 
+            size="lg" 
+            className="rounded-full shadow-lg h-14 w-14 p-0"
+            onClick={() => setAiSuggestionsOpen(true)}
+          >
+            <Sparkles className="w-6 h-6" />
+          </Button>
+        </div>
 
         <MealBuilder open={builderOpen} onClose={() => setBuilderOpen(false)} fridgeItems={fridgeItems} onCreateMeal={createMeal} />
         
