@@ -10,8 +10,11 @@ interface ChatMessage {
   content: string;
 }
 
+type VibeFilter = 'comfort' | 'brainpower' | 'vacation' | 'quick' | null;
+
 interface ChatRequest {
   messages: ChatMessage[];
+  vibeFilter?: VibeFilter;
   fridgeItems: Array<{
     name: string;
     quantity: number;
@@ -33,13 +36,40 @@ interface ChatRequest {
   }>;
 }
 
+const vibeDescriptions: Record<NonNullable<VibeFilter>, string> = {
+  comfort: `🍲 COMFORT FOOD VIBE: The user wants hearty, soul-warming comfort food. Think:
+- High calorie, rich dishes (800-1500+ kcal)
+- Mac and cheese, lasagna, pot pies, mashed potatoes, fried chicken
+- Creamy sauces, melted cheese, buttery goodness
+- Foods that feel like a warm hug`,
+  brainpower: `🧠 BRAIN POWER VIBE: The user wants food for mental clarity and focus. Prioritize:
+- Omega-3 rich foods: salmon, sardines, mackerel, walnuts, flaxseed
+- Antioxidant-rich berries, dark leafy greens
+- Healthy fats: avocado, olive oil, nuts
+- Complex carbs for sustained energy
+- Foods known to support cognitive function`,
+  vacation: `🌴 VACATION VIBES: The user wants tropical, exotic, vacation-inspired flavors. Think:
+- Tropical fruits: mango, pineapple, coconut, papaya, passion fruit
+- Caribbean, Hawaiian, Thai, Mediterranean influences
+- Fresh, bright, citrusy flavors
+- Seafood with tropical twists
+- Dishes that feel like a beach getaway`,
+  quick: `⚡ TOO TIRED TO COOK: The user is exhausted. Create meals that are:
+- Ready in under 10 minutes
+- Minimal ingredients (5 or fewer ideally)
+- Simple techniques: no complex prep
+- One-pan or no-cook options
+- Microwave-friendly or just-assemble dishes
+- Focus on convenience without sacrificing taste`,
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, fridgeItems, pantryItems }: ChatRequest = await req.json();
+    const { messages, vibeFilter, fridgeItems, pantryItems }: ChatRequest = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -54,6 +84,11 @@ serve(async (req) => {
       `- ${item.name} (${item.category}): ${item.quantity} ${item.unit}`
     ).join('\n');
 
+    // Build vibe-specific instructions
+    const vibeSection = vibeFilter && vibeDescriptions[vibeFilter] 
+      ? `\n=== CURRENT VIBE FILTER ===\n${vibeDescriptions[vibeFilter]}\n\nIMPORTANT: Apply this vibe to ALL meal suggestions unless the user explicitly asks for something different!\n`
+      : '';
+
     const systemPrompt = `You are an enthusiastic, can-do personal chef AI assistant. You ALWAYS fulfill recipe requests - no exceptions!
 
 The user has the following items available (use these to save them money when possible):
@@ -63,7 +98,7 @@ ${fridgeList || "Empty - that's okay, we'll add items to the shopping list!"}
 
 === PANTRY (Staples) ===
 ${pantryList || "Empty - that's okay, we'll add items to the shopping list!"}
-
+${vibeSection}
 === CRITICAL RULES - NEVER BREAK THESE ===
 
 1. **NEVER REFUSE A REQUEST**: You can make ANY recipe the user asks for. Even if they have zero ingredients, say "I can make that for you! I'll list the ingredients you need to buy."
@@ -82,6 +117,7 @@ ${pantryList || "Empty - that's okay, we'll add items to the shopping list!"}
   "cookingStyle": "quick|simple|cooked|slow-cook|no-cook",
   "mealType": "breakfast|lunch|dinner|snack",
   "servings": 2,
+  "prepTime": "5 mins",
   "ingredientsHave": [
     { "name": "ingredient from fridge/pantry", "quantity": 1, "unit": "cup", "calories": 100, "protein": 5, "carbs": 10, "fat": 3 }
   ],
@@ -89,7 +125,8 @@ ${pantryList || "Empty - that's okay, we'll add items to the shopping list!"}
     { "name": "ingredient to buy", "quantity": 1, "unit": "cup", "calories": 50, "protein": 2, "carbs": 8, "fat": 1 }
   ],
   "instructions": ["Step 1", "Step 2", "Step 3"],
-  "totalMacros": { "calories": 800, "protein": 40, "carbs": 60, "fat": 30 }
+  "totalMacros": { "calories": 800, "protein": 40, "carbs": 60, "fat": 30 },
+  "vibeMatch": "${vibeFilter || 'none'}"
 }
 \`\`\`
 
@@ -103,6 +140,8 @@ ${pantryList || "Empty - that's okay, we'll add items to the shopping list!"}
 6. **CALORIE FLEXIBILITY**: Honor any calorie request. 400 kcal? Done. 1500 kcal? Absolutely. Make diverse meals: pastas, burgers, steaks, curries, stir-fries, desserts - anything!
 
 7. **BE ENTHUSIASTIC**: You love cooking! When the user asks for a recipe, respond with excitement: "Ooh, great choice!" or "That sounds delicious, let's make it!"
+
+8. **VIBE AWARENESS**: If a vibe filter is active, acknowledge it! Say things like "Perfect for some comfort food!" or "This will definitely fuel your brain!" or "Getting those vacation vibes! 🌴"
 
 Remember: You're a personal chef who makes dreams come true. There's no recipe you can't create - shopping lists exist for a reason!`;
 

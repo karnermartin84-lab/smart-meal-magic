@@ -38,9 +38,19 @@ export interface MealData {
   };
 }
 
+export type VibeFilter = 'comfort' | 'brainpower' | 'vacation' | 'quick' | null;
+
+export const VIBE_FILTERS = [
+  { id: 'comfort' as const, label: 'Comfort Food', emoji: '🍲', description: 'Hearty, high-calorie soul food' },
+  { id: 'brainpower' as const, label: 'Brain Power', emoji: '🧠', description: 'Omega-3s & focus foods' },
+  { id: 'vacation' as const, label: 'Vacation Vibes', emoji: '🌴', description: 'Tropical & exotic flavors' },
+  { id: 'quick' as const, label: 'Too Tired', emoji: '⚡', description: 'Under 10 mins prep' },
+];
+
 export function useAIChefChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeVibe, setActiveVibe] = useState<VibeFilter>(null);
 
   const extractMealData = (content: string): MealData | null => {
     try {
@@ -97,6 +107,7 @@ export function useAIChefChat() {
         },
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+          vibeFilter: activeVibe,
           fridgeItems: fridgeItems.map(item => ({
             name: item.name,
             quantity: item.quantity,
@@ -243,7 +254,7 @@ export function useAIChefChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages]);
+  }, [messages, activeVibe]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -254,5 +265,7 @@ export function useAIChefChat() {
     isLoading,
     sendMessage,
     clearMessages,
+    activeVibe,
+    setActiveVibe,
   };
 }
