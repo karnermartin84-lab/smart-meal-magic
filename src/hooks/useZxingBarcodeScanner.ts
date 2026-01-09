@@ -126,9 +126,6 @@ export function useZxingBarcodeScanner(params: {
   }, [videoRef]);
 
   const start = useCallback(async () => {
-    const video = videoRef.current;
-    if (!video) return;
-
     // New "session" for this start attempt (prevents races if user taps Try Again quickly)
     startSeqRef.current += 1;
     const seq = startSeqRef.current;
@@ -140,6 +137,29 @@ export function useZxingBarcodeScanner(params: {
 
     setStatus("starting");
     setError(null);
+
+    // Wait for video element to be available in DOM (Dialog animation)
+    const waitForVideo = async (maxWait = 1000): Promise<HTMLVideoElement | null> => {
+      const startTime = Date.now();
+      while (Date.now() - startTime < maxWait) {
+        const video = videoRef.current;
+        if (video && video.isConnected) {
+          return video;
+        }
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      return null;
+    };
+
+    const video = await waitForVideo();
+    if (!video) {
+      setStatus("error");
+      setError("Scanner not ready. Please try again.");
+      return;
+    }
+
+    // Check if this start attempt is still current
+    if (seq !== startSeqRef.current) return;
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setStatus("error");
@@ -176,12 +196,12 @@ export function useZxingBarcodeScanner(params: {
 
     const tryPlay = async () => {
       // iOS Safari can be picky; do a couple attempts without hanging.
-      for (let i = 0; i < 2; i += 1) {
+      for (let i = 0; i < 3; i += 1) {
         try {
           await video.play();
           return true;
         } catch {
-          await new Promise((r) => setTimeout(r, 200));
+          await new Promise((r) => setTimeout(r, 150));
         }
       }
       return false;
@@ -236,7 +256,7 @@ export function useZxingBarcodeScanner(params: {
       video.autoplay = true;
       video.srcObject = stream;
 
-      await waitForVideoReady(1500);
+      await waitForVideoReady(2000);
 
       const played = await tryPlay();
       if (!played) {
