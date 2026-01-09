@@ -22,9 +22,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { signOut, user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen mesh-gradient flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b border-border">
+      <header className="sticky top-0 z-50 glass-card border-0 border-b border-border/30 rounded-none">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/app" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -55,7 +55,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-t border-border z-50">
+      <nav className="fixed bottom-0 left-0 right-0 glass-card border-0 border-t border-border/30 rounded-none z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-around h-16">
             {navItems.map(({ path, icon: Icon, label }) => {
