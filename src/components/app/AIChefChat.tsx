@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Trash2, ChefHat, CalendarPlus, Loader2, User } from 'lucide-react';
+import { Send, Trash2, ChefHat, CalendarPlus, Loader2, User, ShoppingCart } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,9 @@ interface AIChefChatProps {
 }
 
 function MealCard({ meal, onAddToPlan }: { meal: MealData; onAddToPlan: () => void }) {
+  const allIngredients = [...meal.ingredientsHave, ...meal.ingredientsMissing];
+  const hasMissing = meal.ingredientsMissing.length > 0;
+
   return (
     <Card className="p-4 mt-3 bg-card/50 border-primary/20">
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -45,19 +48,43 @@ function MealCard({ meal, onAddToPlan }: { meal: MealData; onAddToPlan: () => vo
         </Badge>
       </div>
 
+      {hasMissing && (
+        <div className="mb-3 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+          <p className="text-xs font-medium text-orange-600 dark:text-orange-400 flex items-center gap-1 mb-1">
+            <ShoppingCart className="w-3 h-3" />
+            Missing Ingredients ({meal.ingredientsMissing.length})
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {meal.ingredientsMissing.map(ing => `${ing.quantity} ${ing.unit} ${ing.name}`).join(', ')}
+          </p>
+        </div>
+      )}
+
       <details className="mb-3">
         <summary className="text-sm font-medium cursor-pointer text-primary hover:underline">
-          View ingredients & instructions
+          View all ingredients & instructions
         </summary>
         <div className="mt-2 space-y-2">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase">Ingredients</p>
-            <ul className="text-sm list-disc list-inside">
-              {meal.ingredients.map((ing, i) => (
-                <li key={i}>{ing.quantity} {ing.unit} {ing.name}</li>
-              ))}
-            </ul>
-          </div>
+          {meal.ingredientsHave.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-green-600 dark:text-green-400 uppercase">✓ You Have</p>
+              <ul className="text-sm list-disc list-inside">
+                {meal.ingredientsHave.map((ing, i) => (
+                  <li key={i}>{ing.quantity} {ing.unit} {ing.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {meal.ingredientsMissing.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-orange-600 dark:text-orange-400 uppercase">🛒 Need to Buy</p>
+              <ul className="text-sm list-disc list-inside">
+                {meal.ingredientsMissing.map((ing, i) => (
+                  <li key={i}>{ing.quantity} {ing.unit} {ing.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div>
             <p className="text-xs font-medium text-muted-foreground uppercase">Instructions</p>
             <ol className="text-sm list-decimal list-inside">
@@ -71,7 +98,7 @@ function MealCard({ meal, onAddToPlan }: { meal: MealData; onAddToPlan: () => vo
 
       <Button onClick={onAddToPlan} size="sm" className="w-full">
         <CalendarPlus className="w-4 h-4 mr-2" />
-        Add to Meal Plan
+        Add to Meal Plan {hasMissing && '& Shopping List'}
       </Button>
     </Card>
   );
