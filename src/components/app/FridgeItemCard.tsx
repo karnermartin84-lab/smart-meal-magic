@@ -58,6 +58,9 @@ export function FridgeItemCard({
             {item.brand && (
               <p className="text-sm text-muted-foreground truncate">{item.brand}</p>
             )}
+            {item.serving_size && (
+              <p className="text-xs text-muted-foreground">per {item.serving_size}</p>
+            )}
             
             <div className="flex flex-wrap gap-2 mt-2 text-xs">
               <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">
