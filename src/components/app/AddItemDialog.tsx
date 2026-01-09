@@ -133,6 +133,9 @@ export function AddItemDialog({ open, onClose, onAdd, initialData, loading }: Ad
                 </div>
               </div>
 
+              <p className="text-sm font-medium text-muted-foreground mt-2">
+                Nutrition per serving ({item.serving_size || '100g'}):
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="calories">Calories</Label>
