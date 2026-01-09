@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import AppHome from "./pages/app/AppHome";
 import FridgePage from "./pages/app/FridgePage";
 import MealsPage from "./pages/app/MealsPage";
+import MealPlanPage from "./pages/app/MealPlanPage";
 import SuggestionsPage from "./pages/app/SuggestionsPage";
 import ProfilePage from "./pages/app/ProfilePage";
 
@@ -29,6 +30,7 @@ const AppRoutes = () => (
     <Route path="/app" element={<ProtectedRoute><AppHome /></ProtectedRoute>} />
     <Route path="/app/fridge" element={<ProtectedRoute><FridgePage /></ProtectedRoute>} />
     <Route path="/app/meals" element={<ProtectedRoute><MealsPage /></ProtectedRoute>} />
+    <Route path="/app/plan" element={<ProtectedRoute><MealPlanPage /></ProtectedRoute>} />
     <Route path="/app/suggestions" element={<ProtectedRoute><SuggestionsPage /></ProtectedRoute>} />
     <Route path="/app/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />

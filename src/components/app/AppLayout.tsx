@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, UtensilsCrossed, ShoppingBasket, ChefHat, User, LogOut } from 'lucide-react';
+import { Home, UtensilsCrossed, ShoppingBasket, CalendarDays, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,7 @@ const navItems = [
   { path: '/app', icon: Home, label: 'Home' },
   { path: '/app/fridge', icon: ShoppingBasket, label: 'Fridge' },
   { path: '/app/meals', icon: UtensilsCrossed, label: 'Meals' },
-  { path: '/app/suggestions', icon: ChefHat, label: 'Suggestions' },
+  { path: '/app/plan', icon: CalendarDays, label: 'Plan' },
   { path: '/app/profile', icon: User, label: 'Profile' },
 ];
 

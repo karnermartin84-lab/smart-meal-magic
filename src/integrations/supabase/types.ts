@@ -128,6 +128,44 @@ export type Database = {
           },
         ]
       }
+      meal_plan: {
+        Row: {
+          created_at: string
+          id: string
+          meal_id: string | null
+          plan_date: string
+          slot: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal_id?: string | null
+          plan_date: string
+          slot: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal_id?: string | null
+          plan_date?: string
+          slot?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meals: {
         Row: {
           created_at: string
